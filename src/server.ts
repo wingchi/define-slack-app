@@ -1,4 +1,5 @@
 import app from "./app";
+import bodyParser from "body-parser";
 
 const errorHandler = require("errorhandler");
 
@@ -8,6 +9,8 @@ const errorHandler = require("errorhandler");
 if (process.env.NODE_ENV === "development") {
   app.use(errorHandler());
 }
+
+app.use(bodyParser.urlencoded({ extended: false }));
 
 /**
  * Start Express server.
