@@ -1,3 +1,4 @@
+import { DictionaryResponse } from "./models/DictionaryResponse";
 import express from "express";
 
 require("dotenv").config();
@@ -17,7 +18,6 @@ app.get("/define/:word", (req, res) => {
   const apiType = process.env.MW_API_TYPE;
   const { word } = req.params;
   const url = `${baseUrl}/${apiVersion}/references/${apiType}/json/${word}?key=${apiKey}`;
-  console.log("URL ", url);
   fetch(url)
     .then((response) => {
       if (response.status >= 400) {
@@ -25,8 +25,15 @@ app.get("/define/:word", (req, res) => {
       }
       return response.json();
     })
-    .then((definition) => {
-      res.send(definition);
+    .then((definitions: DictionaryResponse[]) => {
+      // TODO: handle suggested corrections
+      const shortDefs = definitions.map((definition) => {
+        return definition.shortdef.reduce(
+          (combinedShortDefs, nextShortDef) =>
+            combinedShortDefs + ", " + nextShortDef
+        );
+      });
+      res.send(shortDefs);
     })
     .catch((error) => {
       console.error("ERROR ", error);
