@@ -6,7 +6,30 @@ import { SlackCommand } from "../models/SlackCommand";
 export const postSlackDefine = async (req: Request, res: Response) => {
   const { text } = req.body as SlackCommand;
   const shortDefs = await fetchDefinition(text);
-  res.send(shortDefs[0]);
+  res.setHeader("Content-type", "application/json");
+  const shortDefSlackResponse = shortDefs.map((shortDef, index) => {
+    return {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `${index + 1}. ${shortDef}`,
+      },
+    };
+  });
+  const slackResponse = {
+    response_type: "in_channel",
+    blocks: [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `*${text}*`,
+        },
+      },
+      ...shortDefSlackResponse,
+    ],
+  };
+  res.send(slackResponse);
 };
 
 export const getDefine = async (req: Request, res: Response) => {
